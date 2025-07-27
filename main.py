@@ -1,4 +1,5 @@
 import pygame
+import random
 import sys
 from constants import *
 from player import Player
@@ -45,7 +46,7 @@ def main():
         for obj in asteroids:
             for bullet in shot:
                 if bullet.collides_with(obj):
-                    obj.kill()
+                    obj.split()
                     bullet.kill()
 
         screen.fill(color="black")
@@ -55,7 +56,7 @@ def main():
         
         pygame.display.flip()
         
-        dt = (clock.tick(60)) / 1000        
+        dt = (clock.tick(30)) / 1000        
 
 if __name__ == "__main__":
     main()
