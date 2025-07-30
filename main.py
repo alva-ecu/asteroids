@@ -36,7 +36,12 @@ def main():
     player = Player(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2)
     asteroidfield = AsteroidField()
 
+    last_text_blink = 0.0
+    restart_text_visible = True
+    blink_interval = 0.5
+
     while True:
+        screen.fill(color="black")
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 return
@@ -55,6 +60,8 @@ def main():
                         drawable.empty()
                         player = Player(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2) 
                         asteroidfield = AsteroidField()
+                        last_text_blink = 0.0
+                        restart_text_visible = True
 
         if game_state == "playing" and not paused:
             updatable.update(dt)
@@ -70,8 +77,6 @@ def main():
                         obj.split()
                         bullet.kill()
 
-            screen.fill(color="black")
-
         if game_state == "playing" and not paused:
             for obj in drawable:
                 obj.draw(screen)
@@ -86,9 +91,15 @@ def main():
             text_rect = text_surface.get_rect(center=(screen.get_width()//2, screen.get_height()//2 - 30))
             screen.blit(text_surface, text_rect)
 
-            restart_text = restart_font.render("Press SPACE to restart", True, (225, 40, 40))
-            restart_rect = restart_text.get_rect(center=(screen.get_width()//2, screen.get_height()//2 + 30))
-            screen.blit(restart_text, restart_rect)
+            last_text_blink += dt
+            if last_text_blink >= blink_interval:
+                restart_text_visible = not restart_text_visible
+                last_text_blink = 0.0
+
+            if restart_text_visible:
+                restart_text = restart_font.render("Press SPACE to restart", True, (225, 40, 40))
+                restart_rect = restart_text.get_rect(center=(screen.get_width()//2, screen.get_height()//2 + 30))
+                screen.blit(restart_text, restart_rect)
         
         pygame.display.flip()
   
