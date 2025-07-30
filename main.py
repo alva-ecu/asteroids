@@ -30,8 +30,8 @@ def main():
     dt = 0
 
     pause_font = pygame.font.Font("fonts/PressStart2P.ttf", 70)
-    over_font = pygame.font.Font("fonts/PressStart2P.ttf", 40)
-    restart_font = pygame.font.Font("fonts/PressStart2P.ttf", 25)
+    over_font = pygame.font.Font("fonts/PressStart2P.ttf", 70)
+    restart_font = pygame.font.Font("fonts/PressStart2P.ttf", 35)
     
     player = Player(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2)
     asteroidfield = AsteroidField()
@@ -88,7 +88,7 @@ def main():
             screen.blit(text_surface, text_rect)    
         elif game_state == "game_over":
             text_surface = over_font.render("Game Over", True, (0, 0, 200))
-            text_rect = text_surface.get_rect(center=(screen.get_width()//2, screen.get_height()//2 - 30))
+            text_rect = text_surface.get_rect(center=(screen.get_width()//2, screen.get_height()//2 - 50))
             screen.blit(text_surface, text_rect)
 
             last_text_blink += dt
@@ -98,7 +98,7 @@ def main():
 
             if restart_text_visible:
                 restart_text = restart_font.render("Press SPACE to restart", True, (225, 40, 40))
-                restart_rect = restart_text.get_rect(center=(screen.get_width()//2, screen.get_height()//2 + 30))
+                restart_rect = restart_text.get_rect(center=(screen.get_width()//2, screen.get_height()//2 + 50))
                 screen.blit(restart_text, restart_rect)
         
         pygame.display.flip()
