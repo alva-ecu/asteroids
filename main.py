@@ -26,7 +26,7 @@ def main():
 
     screen = pygame.display.set_mode(size=(SCREEN_WIDTH, SCREEN_HEIGHT))
     clock = pygame.time.Clock()
-    font = pygame.font.SysFont(None, 72)
+    font = pygame.font.Font("fonts/PressStart2P.ttf", 70)
     paused = False
     player = Player(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2)
     asteroidfield = AsteroidField()
@@ -61,7 +61,7 @@ def main():
                 obj.draw(screen)
             
         if paused:
-            text_surface = font.render("Paused", True, (255, 255, 255))
+            text_surface = font.render("Paused", True, (0, 0, 200))
             text_rect = text_surface.get_rect(center=(screen.get_width()//2, screen.get_height()//2))
             screen.blit(text_surface, text_rect)    
             
