@@ -1,5 +1,4 @@
 import pygame
-import random
 import sys
 from constants import *
 from player import Player
@@ -27,35 +26,47 @@ def main():
 
     screen = pygame.display.set_mode(size=(SCREEN_WIDTH, SCREEN_HEIGHT))
     clock = pygame.time.Clock()
+    font = pygame.font.SysFont(None, 72)
+    paused = False
     player = Player(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2)
-    dt = 0
     asteroidfield = AsteroidField()
+    dt = 0
 
     while True:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 return
 
-        updatable.update(dt)
-        
-        for obj in asteroids:
-            if obj.collides_with(player):
-                print("Game over!")
-                sys.exit()
-        
-        for obj in asteroids:
-            for bullet in shot:
-                if bullet.collides_with(obj):
-                    obj.split()
-                    bullet.kill()
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_ESCAPE:
+                    paused = not paused
 
-        screen.fill(color="black")
+        if not paused:
+            updatable.update(dt)
+            
+            for obj in asteroids:
+                if obj.collides_with(player):
+                    print("Game over!")
+                    sys.exit()
+            
+            for obj in asteroids:
+                for bullet in shot:
+                    if bullet.collides_with(obj):
+                        obj.split()
+                        bullet.kill()
 
-        for obj in drawable:
-            obj.draw(screen)
-        
+            screen.fill(color="black")
+
+            for obj in drawable:
+                obj.draw(screen)
+            
+        if paused:
+            text_surface = font.render("Paused", True, (255, 255, 255))
+            text_rect = text_surface.get_rect(center=(screen.get_width()//2, screen.get_height()//2))
+            screen.blit(text_surface, text_rect)    
+            
         pygame.display.flip()
-        
+  
         dt = (clock.tick(60)) / 1000        
 
 if __name__ == "__main__":
