@@ -54,3 +54,13 @@ class Asteroid(CircleShape):
         new_asteroid1.velocity = scaling1
         scaling2 = new_velocity2 * 1.2
         new_asteroid2.velocity = scaling2
+
+    # get_score_value method of the Asteroid class    
+    def get_score_value(self):
+        # Smaller asteroids = more points
+        if self.radius <= 20:      # Small asteroid
+            return 100
+        elif self.radius <= 40:    # Medium asteroid  
+            return 50
+        else:                      # Large asteroid
+            return 20

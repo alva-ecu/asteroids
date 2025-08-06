@@ -17,7 +17,7 @@ def main():
     asteroids = pygame.sprite.Group()  # Same as above, but for asteroids
     shot = pygame.sprite.Group()  # Same as above, but for shots
 
-    # Tells each Class which groups new instances (e.g. player1, player2) should automatically join
+    # Containers tell each Class which groups new instances (e.g. player1, player2) should automatically join
     Player.containers = (updatable, drawable)  # When a Player object is created, it's automatically added to both the updatable and drawable groups
     Asteroid.containers = (asteroids, updatable, drawable)  #Same, but for the Asteroid class
     AsteroidField.containers = (updatable,)  #Same, but for the AsteroidField class
@@ -29,6 +29,9 @@ def main():
     dt = 0  # Delta time - time elapsed since last frame
     paused = False  # Boolean for later pause functionality
     game_state = "playing"  # String tracking current state (playing or game over)
+    score = 0  # Initial value to track score when bullets hit asteroids
+    background = pygame.image.load("backgrounds/planet_nmsy.png")  #  Load a background image
+    scaled_bg = pygame.transform.scale(background, (SCREEN_WIDTH, SCREEN_HEIGHT))  # Scale the image to save fit on screen
 
     # Lives system variables
     lives = 3  # Number of lives
@@ -38,13 +41,15 @@ def main():
     #Variables for the blinking "Press SPACE for restart" text
     last_text_blink = 0.0
     restart_text_visible = True
-    blink_interval = 0.5
+    blink_interval = 0.7
 
     # Font variables
     pause_font = pygame.font.Font("fonts/PressStart2P.ttf", 70)  # Font makes it 8-bit like
-    over_font = pygame.font.Font("fonts/PressStart2P.ttf", 60)
-    restart_font = pygame.font.Font("fonts/PressStart2P.ttf", 35)
+    over_font = pygame.font.Font("fonts/PressStart2P.ttf", 100)
+    restart_font = pygame.font.Font("fonts/PressStart2P.ttf", 30)
     lives_font = pygame.font.Font("fonts/PressStart2P.ttf", 24)
+    score_font = pygame.font.Font("fonts/PressStart2P.ttf", 24)
+    score_gover_font = pygame.font.Font("fonts/PressStart2P.ttf", 40)
     
     player = Player(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2)  #This creates a player at the center of the screen
     asteroidfield = AsteroidField()  #This creates the asteroid spawning system
@@ -54,11 +59,11 @@ def main():
         nonlocal player, invincibility_timer  #nonlocal calls for variables from outside the function
         player.position = pygame.Vector2(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2)  # Repositions the player at the center
         player.velocity = pygame.Vector2(0, 0)  # Stops player movement
-        invincibility_timer = invincibility_duration  #Activates invincibility 
+        invincibility_timer = invincibility_duration  #Activates invincibility
 
     # This is where the fun starts: the main game loop!
     while True:  # We set a while (infinite) loop, the code below keeps running continuously
-        screen.fill(color="black")  # This will clear the screen to black each frame
+        screen.blit(scaled_bg, (0, 0))  # The blit method will display the background image
         
         # Event handling code
         for event in pygame.event.get():  # Gets all input events since last frame
@@ -76,6 +81,7 @@ def main():
                     if event.key == pygame.K_SPACE:  # The key pressed is SPACE
                         # Reset everything for new game
                         game_state = "playing"  # Reset the state to playing 
+                        score = 0
                         lives = 3
                         invincibility_timer = 0
                         asteroids.empty()  # This empties the group's values
@@ -110,6 +116,8 @@ def main():
             for obj in asteroids:  # For each asteroid
                 for bullet in shot:  # And for each bullet
                     if bullet.collides_with(obj):
+                        points = obj.get_score_value()
+                        score += points  # Add to your score variable
                         obj.split()  # The asteroid breaks into smaller pieces
                         bullet.kill()  # The bullet is removed from all sprite groups, it "disappears"
 
@@ -123,18 +131,24 @@ def main():
                 obj.draw(screen)  # If the timer reaches zero, the player is drawn solid
             # Draw lives counter
             lives_text = lives_font.render(f"Lives: {lives}", True, (255, 255, 255))  # Renders only text
-            screen.blit(lives_text, (10, 10))  # This effectively draws the lives counter at the top left
+            screen.blit(lives_text, (10, 50))  # This effectively draws the lives counter at the top left
+            score_text = score_font.render(f"Score: {score}", True, (255, 255, 255))
+            screen.blit(score_text, (10, 10))  # Top-left corner
         
         elif paused:  # If the main condition above isn't met...
-            text_surface = pause_font.render("Paused", True, (0, 0, 200))  # Render this text instead
+            text_surface = pause_font.render("Paused", True, (230,150, 20))  # Render this text instead
             text_rect = text_surface.get_rect(center=(screen.get_width()//2, screen.get_height()//2))  # Center it
             background_rect = text_rect.inflate(40, 20)  # Creates a background rectangle that covers the objects
             pygame.draw.rect(screen, (0, 0, 0), background_rect)  # Draws a black rectangle on the screen
             screen.blit(text_surface, text_rect)  # Draws the text surface onto the screen (source, destination)    
         
         elif game_state == "game_over": # If the conditions above aren't met...
-            text_surface = over_font.render("Game Over", True, (0, 0, 200)) # Render this text instead
-            text_rect = text_surface.get_rect(center=(screen.get_width()//2, screen.get_height()//2 - 50)) # Offset text
+            text_surface = over_font.render("GAME OVER", True, (0, 0, 200)) # Render this text instead
+            text_rect = text_surface.get_rect(center=(screen.get_width()//2, screen.get_height()//2 - 100)) # Offset text
+            screen.blit(text_surface, text_rect)  # Draws the text surface onto the screen (source, destination)
+
+            text_surface = score_gover_font.render(f"YOUR SCORE: {score}", True, (255, 255, 255)) # Render this as well
+            text_rect = text_surface.get_rect(center=(screen.get_width()//2, screen.get_height()//2 + 45)) # Offset text
             screen.blit(text_surface, text_rect)  # Draws the text surface onto the screen (source, destination)
 
             # This makes the text blink
@@ -144,10 +158,10 @@ def main():
                 last_text_blink = 0.0  # It resets the timer to zero every time
 
             if restart_text_visible: # When restart_text_visible is TRUE
-                restart_text = restart_font.render("Press SPACE to restart", True, (225, 40, 40))  # It renders the text
-                restart_rect = restart_text.get_rect(center=(screen.get_width()//2, screen.get_height()//2 + 50)) # Offset text
+                restart_text = restart_font.render("Press SPACE to play again", True, (225, 40, 40))  # It renders the text
+                restart_rect = restart_text.get_rect(center=(screen.get_width()//2, screen.get_height()//2 + 185)) # Offset text
                 screen.blit(restart_text, restart_rect)  # Draws the text surface onto the screen (source, destination)
-        
+            
         pygame.display.flip()  # Updates the entire screen with everything drawn this frame
         dt = (clock.tick(60)) / 1000  # Limits the game to 60 fps and converts to seconds for dt
 
